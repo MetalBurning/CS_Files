@@ -1,0 +1,20 @@
+#!/usr/bin/gnuplot
+reset
+set terminal png size 1080,1080
+set size 1,1
+#set xdata time
+#set timefmt "%d/%m/%Y %H:%M:%S"
+#set format x "%H"
+set xlabel "Time"
+
+set ylabel "Average Memory Usage by hour"
+#set yrange [200:400]
+
+set title "Average Memory Usage"
+set grid
+
+set style data linespoints
+
+plot "testdata.txt" using 2:5 smooth unique title "Average Memory Usage"
+
+#

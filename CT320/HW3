@@ -1,0 +1,4 @@
+#! /bin/bash
+
+numProcesses=$(ps aux | wc -l)
+echo $numProcesses

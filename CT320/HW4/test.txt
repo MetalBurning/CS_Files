@@ -1,0 +1,4 @@
+www.cs.colostate.edu 
+www.math.colostate.edu 
+www.physics.colostate.edu 
+www.languages.colostate.edu 
