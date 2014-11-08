@@ -8,20 +8,21 @@ import java.util.LinkedList;
  * 
  * @modifiedBy: Jacob Rede
  */
-		class InorderIterator {
+		public class Iterator {
 			
 			//TODO: Create your needed instance variables.
 			// a queue tracks the order for visiting the tree nodes
 			LinkedList inqueue = new LinkedList();
-			private TreeNode next;
+			public Term[] allTerms;
 			/**
 			 * Construct a new iterator object.
 			 * @param binTree
 			 */
-			public InorderIterator(TreeNode rootNode) {
-				this.next = rootNode;
+			public Iterator(TermIndexTable HashTable) {
+				int sizeOfTable = HashTable.size();
+				allTerms = HashTable.getValues().clone();
 				//this.depthSearched = 0;
-				setInorder();
+				setQueue();
 				
 				//TODO: Initialize your instance variables.
 			}
@@ -48,7 +49,7 @@ import java.util.LinkedList;
 				if (inqueue.isEmpty()) {
 					return null;
 				}
-				Term tempTerm = new Term("tenp");
+				Term tempTerm = new Term("temp");
 				tempTerm = (Term) inqueue.getFirst();
 				inqueue.removeFirst();
 				return tempTerm;
@@ -58,18 +59,13 @@ import java.util.LinkedList;
 			/*
 			 * Put the correct order of nodes onto the queue
 			 */
-			public void setInorder() {
+			public void setQueue() {
 				//TODO: calls inorder
-				inorder(this.next);
-				
-			}
-			private void inorder(TreeNode treeNode) {
-				//TODO: recursively visit nodes in the tree, 
-				//      adding as appropriate to the queue
-				if (treeNode != null) {
-					inorder(treeNode.getLeft());
-					inqueue.add(treeNode.getItem());
-					inorder(treeNode.getRight());
+				for(int j = 0;j < allTerms.length; j++) {
+					if (allTerms[j] != null) {
+						inqueue.add(allTerms[j]);
+					}
 				}
+				
 			}
 		}
