@@ -17,7 +17,7 @@ public class PA4 {
 		int tableSize = 0;
 		ArrayList<String> fileNameList = new ArrayList();
 		ArrayList<String> whichPagesWordList = new ArrayList();
-		ArrayList<String> prunestopwords = new ArrayList();
+		ArrayList<String> pruneStopWords = new ArrayList();
 		try {
 			
 			Scanner fileScanner = new Scanner(new File(args[0]));
@@ -61,11 +61,12 @@ public class PA4 {
 			boolean stopTrigger = false;
 			while (fileScanner.hasNext()) {
 				String nextString = fileScanner.next();
-				if (nextString.equals("*STOPs*")) {
+				if (!nextString.equals("*STOPs*") && !stopTrigger) {
+					pruneStopWords.add(nextString);
+					
+				} else if (nextString.equals("*STOPs*")) {
 					stopTrigger = true;
-					prunestopwords.add(nextString);
-				}
-				if (stopTrigger) {
+				} else if (stopTrigger) {
 					whichPagesWordList.add(nextString);
 				}
 			}
@@ -88,11 +89,15 @@ public class PA4 {
 		for (int j = 0; j < fileNameList.size(); j++) {
 			webPageObject.addPage(fileNameList.get(j));
 		}
+		for (int j = 0; j < pruneStopWords.size(); j++) {
+			//System.out.println(pruneStopWords.get(j));
+			webPageObject.pruneStopWords(pruneStopWords.get(j));
+		}
 		
 		// *******************************************************
 		webPageObject.printTerms();
 		// *******************************************************
-		//webPageObject.pruneStopWords(numStopWords);
+		
 		// *******************************************************
 		System.out.println();
 		

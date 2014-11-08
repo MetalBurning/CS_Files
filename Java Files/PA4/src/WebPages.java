@@ -21,7 +21,6 @@ public class WebPages {
 		totalDocuments = 0;
 	}
 	public void addPage(String filename) {
-		System.out.println(hashCode());
 		try {
 			Scanner fileScanner = new Scanner(new File(filename));
 			while (fileScanner.hasNextLine()) {
@@ -80,23 +79,19 @@ public class WebPages {
 	}
 	public void printTerms() {
 		System.out.println("WORDS");
-//		while (FinalTree.BSTIterator.hasNext()) {
-//			Term tempTerm = new Term("temp");
-//			tempTerm = FinalTree.BSTIterator.next();
-//			System.out.println(tempTerm.getWord());
-//		}
+		FinalTree.printHashTableWords();
 	}
 	//###########################################OLD PA2 Code pruneStopWords
-		/*
-		 * First sorts the termIndex by totalFrequency in the term objects.
-		 * Then removes n words from the end of the sort.
-		 * Then resorts based on the word in Term objects(alphabetize).
-		 */
-			public void pruneStopWords(String removeTerm) {
-				if (FinalTree.contains(removeTerm)) {
-					FinalTree.delete(removeTerm);
-				}
-			}
+	/*
+	 * First sorts the termIndex by totalFrequency in the term objects.
+	 * Then removes n words from the end of the sort.
+	 * Then resorts based on the word in Term objects(alphabetize).
+	 */
+	public void pruneStopWords(String removeTerm) {
+		if (FinalTree.contains(removeTerm)) {
+			FinalTree.delete(removeTerm);
+		}
+	 }
 	//###########################################END OLD PA2 Code pruneStopWords
 	
 	public String[] whichPages(String word) {

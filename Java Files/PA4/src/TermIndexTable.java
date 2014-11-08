@@ -59,6 +59,7 @@ public class TermIndexTable implements TermIndex {
     }
 	@Override
 	public void delete(String word) {
+		//System.out.println("word to delete: "+word);
 		if (!contains(word)) 
             return;
  
@@ -108,11 +109,12 @@ public class TermIndexTable implements TermIndex {
         }            
         return null;
 	}
-    public void printHashTable() {
-        System.out.println("\nHash Table: ");
-        for (int i = 0; i < maxSize; i++)
-            if (keys[i] != null)
-                System.out.println("Key:"+ keys[i] +" | value: "+ values[i].getWord());
+    public void printHashTableWords() {
+        for (int i = 0; i < maxSize; i++) {
+        	if (keys[i] != null) {
+                System.out.println(values[i].getWord());
+        	}
+        }
         System.out.println();
     } 
 }
