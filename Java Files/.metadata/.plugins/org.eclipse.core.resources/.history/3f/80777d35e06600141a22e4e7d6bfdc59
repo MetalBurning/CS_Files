@@ -1,0 +1,43 @@
+
+
+public class TermIndexTable implements TermIndex {
+	private Term values[];
+	private String keys[];
+	private int currentSize, maxSize;
+	
+	
+	public TermIndexTable(int startSize) {
+		values = new Term[startSize];	//sets the size
+		keys = new String[startSize];
+		currentSize = 0;
+		maxSize = startSize;
+	}
+	
+	@Override
+	public void add(String filename, String newWord) {
+		Term newTermObject = new Term(newWord.toLowerCase());
+		newTermObject.incFrequency(filename);
+		termArray[Math.abs(newWord.toLowerCase().hashCode())%termArray.length];
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int size() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void delete(String word) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Term get(String word, Boolean printP) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

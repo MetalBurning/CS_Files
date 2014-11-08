@@ -1,0 +1,76 @@
+
+
+public class TermIndexTable implements TermIndex {
+	private Term values[];
+	private String keys[];
+	private int currentSize, maxSize;
+	
+	
+	public TermIndexTable(int startSize) {
+		values = new Term[startSize];	//sets the size
+		keys = new String[startSize];
+		currentSize = 0;
+		maxSize = startSize;
+	}
+	
+	@Override
+	public void add(String filename, String newWord) {
+		newWord = newWord.toLowerCase();
+		Term newTermObject = new Term(newWord);
+		newTermObject.incFrequency(filename);
+		int key = Math.abs(newWord.hashCode())%maxSize];
+		
+		int hashedWord = hash(newWord);
+        int tempHashedWord = hashedWord;
+        int quadraticProb = 1;
+        do
+        {
+            if (keys[tempHashedWord] == null)
+            {
+                keys[tempHashedWord] = keys;
+                values[tempHashedWord] = newWord;
+                currentSize++;
+                return;
+            }
+            if (keys[tempHashedWord].equals(keys)) 
+            { 
+            	values[tempHashedWord] = val; 
+                return; 
+            }            
+            tempHashedWord = (tempHashedWord + h * h++) % maxSize;            
+        } while (tempHashedWord != hashedWord);       
+		
+		
+		
+		
+		// TODO Auto-generated method stub
+		
+	}
+	private int hash(String word) {
+        return word.hashCode() % maxSize;
+    }  
+	@Override
+	public int size() {
+       return currentSize;
+    }
+
+	@Override
+	public void delete(String word) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Term get(String word, Boolean printP) {
+		int hashedWord = hash(word);
+		int quadraticProb = 0;
+        while (keys[hashedWord] != null) {
+            if (keys[hashedWord].equals(word)) {
+                return values[hashedWord];
+            }
+            hashedWord = (hashedWord + quadraticProb * quadraticProb++) % maxSize;// Increments quadraticProb after the math
+        }            
+        return null;
+	}
+
+}

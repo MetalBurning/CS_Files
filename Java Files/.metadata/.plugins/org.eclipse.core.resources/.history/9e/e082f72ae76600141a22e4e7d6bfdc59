@@ -1,0 +1,98 @@
+
+
+public class TermIndexTable implements TermIndex {
+	private Term values[];
+	private String keys[];
+	private int currentSize, maxSize;
+	
+	
+	public TermIndexTable(int startSize) {
+		values = new Term[startSize];	//sets the size
+		keys = new String[startSize];
+		currentSize = 0;
+		maxSize = startSize;
+	}
+	
+	@Override
+	public void add(String filename, String newWord) {
+		newWord = newWord.toLowerCase();
+		Term newTermObject = new Term(newWord);
+		newTermObject.incFrequency(filename);
+		
+		int keyToAdd = Math.abs(hash(newWord));
+		int tempKeyCopy = keyToAdd;
+        int quadraticProb = 1;
+        do {
+            if (keys[keyToAdd] == null) {
+                keys[keyToAdd] = newWord;
+                values[keyToAdd] = newTermObject;
+                currentSize++;
+                return;
+            }
+            if (keys[keyToAdd].equals(newWord)) { 
+            	values[keyToAdd] = newTermObject; 
+            	//might need to incfrequency here
+                return; 
+            }            
+            keyToAdd = (keyToAdd + quadraticProb * quadraticProb++) % maxSize;            
+        } while (tempKeyCopy != keyToAdd);       
+		
+		
+		
+		
+		// TODO Auto-generated method stub
+		
+	}
+	private int hash(String word) {
+        return Math.abs(word.hashCode() % maxSize);
+    }  
+	@Override
+	public int size() {
+       return currentSize;
+    }
+	public boolean contains(String key) 
+    {
+        return get(key, false) !=  null;
+    }
+	@Override
+	public void delete(String word) {
+		if (!contains(word)) 
+            return;
+ 
+        /** find position key and delete **/
+        int key = hash(word);
+        int quadraticProb = 1;
+        
+        while (!word.equals(keys[key])) 
+        	key = (key + quadraticProb * quadraticProb++) % maxSize;        
+        keys[i] = vals[i] = null;
+ 
+        /** rehash all keys **/        
+        for (i = (i + h * h++) % maxSize; keys[i] != null; i = (i + h * h++) % maxSize)
+        {
+            String tmp1 = keys[i], tmp2 = vals[i];
+            keys[i] = vals[i] = null;
+            currentSize--;  
+            insert(tmp1, tmp2);            
+        }
+        currentSize--;  
+		
+	}
+	
+	@Override
+	public Term get(String word, Boolean printP) {
+		int hashedWord = hash(word);
+		int quadraticProb = 0;
+        while (keys[hashedWord] != null) {
+            if (keys[hashedWord].equals(word)) {
+            	if(printP) {
+            		values[hashedWord].printTest();
+            	}
+                return values[hashedWord];
+            }
+            hashedWord = (hashedWord + quadraticProb * quadraticProb++) % maxSize;// Increments quadraticProb after the math
+        }            
+        return null;
+	}
+
+}

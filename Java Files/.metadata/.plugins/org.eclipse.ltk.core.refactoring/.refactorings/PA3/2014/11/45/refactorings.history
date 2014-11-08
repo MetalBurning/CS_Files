@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy 7 elements to &apos;PA4/src&apos;&#x0A;- Original project: &apos;PA3&apos;&#x0A;- Destination element: &apos;PA4/src&apos;&#x0A;- Original elements:&#x0A;     WebPages.java&#x0A;     TreeNode.java&#x0A;     Occurrence.java&#x0A;     Mergesort.java&#x0A;     Term.java&#x0A;     InorderIterator.java&#x0A;     PA3.java" description="Copy compilation units" destination="=PA4/src" element1="/src&lt;{WebPages.java" element2="/src&lt;{TreeNode.java" element3="/src&lt;{Occurrence.java" element4="/src&lt;{Mergesort.java" element5="/src&lt;{Term.java" element6="/src&lt;{InorderIterator.java" element7="/src&lt;{PA3.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1415383409159" units="7" version="1.0"/>
+</session>

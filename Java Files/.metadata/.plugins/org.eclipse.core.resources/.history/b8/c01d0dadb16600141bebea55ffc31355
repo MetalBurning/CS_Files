@@ -1,0 +1,34 @@
+
+
+public class TermIndexTable implements TermIndex {
+	Term termArray[];
+	
+	public TermIndexTable(int startSize) {
+		termArray = new Term[startSize];
+	}
+	
+	@Override
+	public void add(String filename, String newWord) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int size() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void delete(String word) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Term get(String word, Boolean printP) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}
