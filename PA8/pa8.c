@@ -4,7 +4,7 @@
 
 void printDigit(unsigned short digit) {
 	char character = (char)(((int)'0')+digit);
-	printf("%c", character);
+	printf("%c\n", character);
 }
 void printValue(unsigned short value) {
 	if(value < 10) {
