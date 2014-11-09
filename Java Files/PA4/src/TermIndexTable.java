@@ -53,8 +53,7 @@ public class TermIndexTable implements TermIndex {
 	public int size() {
        return currentSize;
     }
-	public boolean contains(String key) 
-    {
+	public boolean contains(String key) {
         return get(key, false) !=  null;
     }
 	@Override

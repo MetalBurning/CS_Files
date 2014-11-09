@@ -7,6 +7,8 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Scanner;
 
 public class PA4 {
@@ -16,7 +18,7 @@ public class PA4 {
 		int numStopWords = 0;
 		int tableSize = 0;
 		ArrayList<String> fileNameList = new ArrayList();
-		ArrayList<String> bestPagesWordList = new ArrayList();
+		ArrayList<ArrayList<String>> bestPagesWordList = new ArrayList<ArrayList<String>>();
 		ArrayList<String> pruneStopWords = new ArrayList();
 		try {
 			
@@ -70,10 +72,13 @@ public class PA4 {
 				} else if (cleanedWords[0].equals("*STOPs*")) {
 					stopTrigger = true;
 				} else if (stopTrigger) {
+					ArrayList tempList = new ArrayList();
 					//hence the loop here to cycle through all the words in cleanedWords
-					for(int j = 0; j < cleanedWords.length-1;j++) {
-						bestPagesWordList.add(cleanedWords[j]);
+					Arrays.sort(cleanedWords);
+					for(int h = 0; h < cleanedWords.length;h++) {
+						tempList.add(cleanedWords[h]);
 					}
+					bestPagesWordList.add(tempList);// adds array of strings into an arraylist, each arraylist is one read line on the input file
 				}
 			}
 			
@@ -104,8 +109,15 @@ public class PA4 {
 		webPageObject.printTerms();
 		// *******************************************************
 		
+		
+		//testing
+		System.out.println(webPageObject.TFIDF("simple4a.txt", "cat"));
+		//endtesting
 		// *******************************************************
 		System.out.println();
+		for(int j = 0; j < bestPagesWordList.size(); j++) {
+			webPageObject.bestPages(bestPagesWordList.get(j));
+		}
 		
 		
 		
