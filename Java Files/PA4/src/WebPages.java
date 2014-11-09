@@ -79,7 +79,11 @@ public class WebPages {
 	}
 	public void printTerms() {
 		System.out.println("WORDS");
-		FinalTree.printHashTableWords();
+		Iterator hashTableIterator = new Iterator(FinalTree);
+		while (hashTableIterator.hasNext()) {
+			System.out.println(hashTableIterator.next().getWord());
+		}
+		//FinalTree.printHashTableWords();
 	}
 	//###########################################OLD PA2 Code pruneStopWords
 	/*
@@ -141,6 +145,11 @@ public class WebPages {
 		DecimalFormat formatter = new DecimalFormat("0.00");
 		return formatter.format(result);
 	}
+	public void bestPages(String Query) {
+		double queryWieghts;
+		double docSpecific;
+		
+	}
 	/*
 	 * #####################################################################################################
 	 * #####################################PRIVATE BST CLASS###############################################
@@ -154,98 +163,98 @@ public class WebPages {
 	 * is only fully created once the last add method has ran
 	 * @param <int> searchDepth = stores the depth when search is called, resets to 1 every time get is called
 	 */
-	private class BST {
-		private int count;
-		private TreeNode root;
-		public InorderIterator BSTIterator;
-		private int searchDepth;
-		
-		public BST() {
-			this.count = 0;
-			this.searchDepth = 0;
-			this.root = null;
-			BSTIterator = null;
-			
-		}
-		public int size() {
-			return this.count;
-		}
-		/*
-		 * adds words into the BST, if the root is null then we have an empty BST, so we create our first TreeNode
-		 * if the root node isn't null we call the insetWord method (which is recursive) 
-		 */
-		public void add(String documentName, String word) {
-			if (this.root == null) {
-				Term newTermObject = new Term(word);
-				newTermObject.incFrequency(documentName);
-				this.root = new TreeNode(newTermObject);
-				BSTIterator = new InorderIterator(this.root);
-				this.count++;//increment the word count since were creating a new Term object
-			} else {
-				insertWord(word, this.root, documentName);
-				BSTIterator = new InorderIterator(this.root);
-			}
-			//adds a new term or increments frequencies if the term already exists in the BST
-		}
-		/*
-		 * returns the Term Object of word by searching the BST
-		 * calls search (which is recursive)
-		 * prints the serachDepth if printDepth is true or 
-		 * if its false but the search returned null (meaning it did not find the word in our BST, so it doesn't exist)
-		 */
-		public Term get(String word, Boolean printDepth) {
-			this.searchDepth = 1;
-			Term tempTerm = search(word.toLowerCase(), this.root);
-			if (printDepth) {
-				System.out.println("  At depth "+this.searchDepth);
-				printDepth = false;
-			} else if (printDepth == false && tempTerm == null) {
-				System.out.println("  At depth "+this.searchDepth);
-			}
-			return tempTerm;
-		}
-		/*
-		 * recursively search the BST, same format as insertWord below, 
-		 * without the documentName since we dont need it
-		 */
-		public Term search(String word, TreeNode treeNode) {
-			if (treeNode == null) {
-				return null;
-			} else if (word.compareTo(treeNode.getItem().getWord()) == 0) {
-				return treeNode.getItem();
-			} else if (word.compareTo(treeNode.getItem().getWord()) < 0) {
-				this.searchDepth++;
-				return search(word, treeNode.getLeft());
-			} else {
-				this.searchDepth++;
-				return search(word, treeNode.getRight());
-			}
-			
-		}
-		/*
-		 * recursive method that will traverse the binary tree and insert nodes where they belong
-		 * if TreeNode is null, then we hit our base case so we create a new TreeNode w/ inputWord 
-		 * inputWord < TreeNode's word then recurse with the leftSubTree
-		 * inputWord == TreeNode's word then increment the frequency of the word that already exists
-		 * inputWord > TreeNode's word then recurse onto the rightSubTree
-		 */
-		public TreeNode insertWord(String inputWord, TreeNode treeNode, String documentName) {
-			//System.out.print("asdasd");
-			if (treeNode == null) {
-				Term newTermObject = new Term(inputWord);
-				newTermObject.incFrequency(documentName);
-				treeNode = new TreeNode(newTermObject);
-				this.count++;//increment the word count since were creating a new Term object
-			} else if (inputWord.compareTo(treeNode.getItem().getWord()) < 0) {
-				treeNode.setLeft(insertWord(inputWord, treeNode.getLeft(), documentName));
-			} else if (inputWord.compareTo(treeNode.getItem().getWord()) == 0) {
-				treeNode.getItem().incFrequency(documentName);
-			} else {
-				treeNode.setRight(insertWord(inputWord, treeNode.getRight(), documentName));
-			}
-			return treeNode;
-		}
-	}//end private BST
+//	private class BST {
+//		private int count;
+//		private TreeNode root;
+//		public InorderIterator BSTIterator;
+//		private int searchDepth;
+//		
+//		public BST() {
+//			this.count = 0;
+//			this.searchDepth = 0;
+//			this.root = null;
+//			BSTIterator = null;
+//			
+//		}
+//		public int size() {
+//			return this.count;
+//		}
+//		/*
+//		 * adds words into the BST, if the root is null then we have an empty BST, so we create our first TreeNode
+//		 * if the root node isn't null we call the insetWord method (which is recursive) 
+//		 */
+//		public void add(String documentName, String word) {
+//			if (this.root == null) {
+//				Term newTermObject = new Term(word);
+//				newTermObject.incFrequency(documentName);
+//				this.root = new TreeNode(newTermObject);
+//				BSTIterator = new InorderIterator(this.root);
+//				this.count++;//increment the word count since were creating a new Term object
+//			} else {
+//				insertWord(word, this.root, documentName);
+//				BSTIterator = new InorderIterator(this.root);
+//			}
+//			//adds a new term or increments frequencies if the term already exists in the BST
+//		}
+//		/*
+//		 * returns the Term Object of word by searching the BST
+//		 * calls search (which is recursive)
+//		 * prints the serachDepth if printDepth is true or 
+//		 * if its false but the search returned null (meaning it did not find the word in our BST, so it doesn't exist)
+//		 */
+//		public Term get(String word, Boolean printDepth) {
+//			this.searchDepth = 1;
+//			Term tempTerm = search(word.toLowerCase(), this.root);
+//			if (printDepth) {
+//				System.out.println("  At depth "+this.searchDepth);
+//				printDepth = false;
+//			} else if (printDepth == false && tempTerm == null) {
+//				System.out.println("  At depth "+this.searchDepth);
+//			}
+//			return tempTerm;
+//		}
+//		/*
+//		 * recursively search the BST, same format as insertWord below, 
+//		 * without the documentName since we dont need it
+//		 */
+//		public Term search(String word, TreeNode treeNode) {
+//			if (treeNode == null) {
+//				return null;
+//			} else if (word.compareTo(treeNode.getItem().getWord()) == 0) {
+//				return treeNode.getItem();
+//			} else if (word.compareTo(treeNode.getItem().getWord()) < 0) {
+//				this.searchDepth++;
+//				return search(word, treeNode.getLeft());
+//			} else {
+//				this.searchDepth++;
+//				return search(word, treeNode.getRight());
+//			}
+//			
+//		}
+//		/*
+//		 * recursive method that will traverse the binary tree and insert nodes where they belong
+//		 * if TreeNode is null, then we hit our base case so we create a new TreeNode w/ inputWord 
+//		 * inputWord < TreeNode's word then recurse with the leftSubTree
+//		 * inputWord == TreeNode's word then increment the frequency of the word that already exists
+//		 * inputWord > TreeNode's word then recurse onto the rightSubTree
+//		 */
+//		public TreeNode insertWord(String inputWord, TreeNode treeNode, String documentName) {
+//			//System.out.print("asdasd");
+//			if (treeNode == null) {
+//				Term newTermObject = new Term(inputWord);
+//				newTermObject.incFrequency(documentName);
+//				treeNode = new TreeNode(newTermObject);
+//				this.count++;//increment the word count since were creating a new Term object
+//			} else if (inputWord.compareTo(treeNode.getItem().getWord()) < 0) {
+//				treeNode.setLeft(insertWord(inputWord, treeNode.getLeft(), documentName));
+//			} else if (inputWord.compareTo(treeNode.getItem().getWord()) == 0) {
+//				treeNode.getItem().incFrequency(documentName);
+//			} else {
+//				treeNode.setRight(insertWord(inputWord, treeNode.getRight(), documentName));
+//			}
+//			return treeNode;
+//		}
+//	}//end private BST
 	/*
 	 * #####################################################################################################
 	 * #####################################END PRIVATE BST CLASS###########################################
