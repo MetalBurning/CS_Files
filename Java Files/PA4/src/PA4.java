@@ -16,7 +16,7 @@ public class PA4 {
 		int numStopWords = 0;
 		int tableSize = 0;
 		ArrayList<String> fileNameList = new ArrayList();
-		ArrayList<String> whichPagesWordList = new ArrayList();
+		ArrayList<String> bestPagesWordList = new ArrayList();
 		ArrayList<String> pruneStopWords = new ArrayList();
 		try {
 			
@@ -59,15 +59,21 @@ public class PA4 {
 		//###########################END OLD PA3 STUFF###################3	
 			//reads in everything after EOF
 			boolean stopTrigger = false;
-			while (fileScanner.hasNext()) {
-				String nextString = fileScanner.next();
-				if (!nextString.equals("*STOPs*") && !stopTrigger) {
+			while (fileScanner.hasNextLine()) {
+				String nextString = fileScanner.nextLine();
+				String[] cleanedWords = nextString.split("\\s+");//splits on space characters and tabs
+				
+				//cleanedwords should only have one String in [0] position
+				//until stopTrigger is turned on then it should have more
+				if (!cleanedWords[0].equals("*STOPs*") && !stopTrigger) {
 					pruneStopWords.add(nextString);
-					
-				} else if (nextString.equals("*STOPs*")) {
+				} else if (cleanedWords[0].equals("*STOPs*")) {
 					stopTrigger = true;
 				} else if (stopTrigger) {
-					whichPagesWordList.add(nextString);
+					//hence the loop here to cycle through all the words in cleanedWords
+					for(int j = 0; j < cleanedWords.length-1;j++) {
+						bestPagesWordList.add(cleanedWords[j]);
+					}
 				}
 			}
 			
@@ -101,25 +107,30 @@ public class PA4 {
 		// *******************************************************
 		System.out.println();
 		
-		/*
-		 * Loops through the whichPagesWordList (arrayList) are getting all the Strings it has and checking them.
-		 * foreach loop prints out the information needed
-		 */
-		for(int k = 0; k < whichPagesWordList.size();k++) {
-			int counter = 0;
-			String Term1 = whichPagesWordList.get(k);
-			for(String resultFileName : webPageObject.whichPages(whichPagesWordList.get(k))) {
-				if (resultFileName == null) {
-					System.out.print(Term1+" not found");
-				} else if (counter == 0) {
-					System.out.print(Term1+" in pages: "+resultFileName+": "+webPageObject.TFIDF(resultFileName, Term1));
-				} else {
-					System.out.print(", "+resultFileName+": "+webPageObject.TFIDF(resultFileName, Term1));
-				}
-				counter++;
-			}
-			System.out.println();
-			
-		}
+		
+		
+		
+		//##########################################OLD PA3 CODE########################################33
+//		/*
+//		 * Loops through the whichPagesWordList (arrayList) are getting all the Strings it has and checking them.
+//		 * foreach loop prints out the information needed
+//		 */
+//		for(int k = 0; k < whichPagesWordList.size();k++) {
+//			int counter = 0;
+//			String Term1 = whichPagesWordList.get(k);
+//			for(String resultFileName : webPageObject.whichPages(whichPagesWordList.get(k))) {
+//				if (resultFileName == null) {
+//					System.out.print(Term1+" not found");
+//				} else if (counter == 0) {
+//					System.out.print(Term1+" in pages: "+resultFileName+": "+webPageObject.TFIDF(resultFileName, Term1));
+//				} else {
+//					System.out.print(", "+resultFileName+": "+webPageObject.TFIDF(resultFileName, Term1));
+//				}
+//				counter++;
+//			}
+//			System.out.println();
+//			
+//		}
+		//##########################################END OLD PA3 CODE########################################33
 	}
 }

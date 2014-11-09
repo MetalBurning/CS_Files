@@ -20,7 +20,7 @@ import java.util.LinkedList;
 			 */
 			public Iterator(TermIndexTable HashTable) {
 				int sizeOfTable = HashTable.size();
-				allTerms = HashTable.getValues().clone();
+				allTerms = ((TermIndexTable) HashTable).getValues().clone();
 				//this.depthSearched = 0;
 				setQueue();
 				

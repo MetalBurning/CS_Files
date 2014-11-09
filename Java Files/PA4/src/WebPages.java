@@ -145,10 +145,20 @@ public class WebPages {
 		DecimalFormat formatter = new DecimalFormat("0.00");
 		return formatter.format(result);
 	}
-	public void bestPages(String Query) {
+	public void bestPages(ArrayList<String> Query) {
 		double queryWieghts;
+		double commone;
 		double docSpecific;
-		
+		for(String singleQuery : Query) {// for every item that exists in query, we compare it with all the terms 
+			Iterator TermIterator = new Iterator(FinalTree);
+			while (TermIterator.hasNext()) {
+				Term tempTerm = TermIterator.next();
+				if (singleQuery.equals(tempTerm.getWord())) {
+					//compute wi,q add it to queryWeights
+				}
+			}
+			
+		}
 	}
 	/*
 	 * #####################################################################################################
