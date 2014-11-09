@@ -146,33 +146,49 @@ public class WebPages {
 			}
 		}
 		double result = occurrenceTermFrequency * (Math.log((double)totalDocuments / (double)docListSize));
-		DecimalFormat formatter = new DecimalFormat("0.00");
+		//DecimalFormat formatter = new DecimalFormat("0.00");
 		return result;
 	}
 	public void bestPages(ArrayList<String> Query) {
-		
-		double common[] = new double[this.totalDocuments];
+		DecimalFormat formatter = new DecimalFormat("0.000000000");
+		double common[][] = new double[Query.size()][this.totalDocuments];
 		double docSpecific[] = new double[this.totalDocuments];
-		double totalSim[] = new double[this.totalDocuments];
+		double totalSim[][] = new double[Query.size()][this.totalDocuments];
 		String docs[] = new String[this.totalDocuments];
 		int docsCounter = 0;
 		for(String documentName : this.fileNameList) {
 			docs[docsCounter++] = documentName;
 		}
-		double sim = 0;
-		String finalDocumentName = "";
-		double queryWeights = 0;
+		String[][] cleanedWords = new String[Query.size()][];
+		
+		double queryWeights[] = new double[Query.size()];
 		int queryCounter = 0;
+		
+		for(int j = 0; j < docs.length; j++) {//for every document, iterat through all terms and do 
+			//b.     For each document d that contains term i:
+			Iterator TermIteratorBeforeScan = new Iterator(FinalTree);
+			while (TermIteratorBeforeScan.hasNext()) {
+				Term tempTerm = TermIteratorBeforeScan.next();
+				for(Occurrence occurrenceObject: tempTerm.docList) {//loop through all occurrence objects in the term
+					if(occurrenceObject.getDocName().equals(docs[j])) {//  i.     Compute the tfidf value (wi,d), square it and add it to the value in docSpecific in the position for doc d 
+						Double TFIDF = TFIDF(occurrenceObject.getDocName(), tempTerm.getWord());
+						
+						docSpecific[j] += (TFIDF*TFIDF);
+					}
+				}
+			}
+		}
 		
 		for(int m = 0; m < Query.size();m++) {// arraylist contains raw line by line Strings
 			String temp = Query.get(m);
-			String[] cleanedWords = temp.split("\\s+");
-			Arrays.sort(cleanedWords);
-			//queryweight
-			
-			
+			cleanedWords[m] = temp.split("\\s+");
+			for(int j = 0; j < cleanedWords[m].length; j++) {
+				cleanedWords[m][j] = cleanedWords[m][j].toLowerCase();// make them lowercase
+			}
+			Arrays.sort(cleanedWords[m]); //sort
 			for(int j = 0; j < cleanedWords.length; j++) {// for every item that exists in query, we compare it with all the terms 
-				String singleQuery = cleanedWords[j].toLowerCase();
+				String singleQuery = cleanedWords[m][j].toLowerCase();
+				//System.out.print(singleQuery+" ");
 				Iterator TermIterator = new Iterator(FinalTree);
 				while (TermIterator.hasNext()) {
 					Term tempTerm = TermIterator.next();
@@ -182,50 +198,74 @@ public class WebPages {
 						int documentsReadIn = this.totalDocuments;
 						//WIQ = .5X(1+ln(n/dfi))
 						double WIQ = 0.5 * (1 + Math.log((double)documentsReadIn/dfi));
-						queryWeights += WIQ;
-						//b.     For each document d that contains term i:
+						
+						//double formatedWIQWIQ = Double.parseDouble(formatter.format((WIQ*WIQ)));
+						queryWeights[queryCounter] += (WIQ*WIQ);
 						for(Occurrence occurrenceObject: tempTerm.docList) {
-							//  i.     Compute the tfidf value (wi,d), square it and add it to the value in docSpecific in the position for doc d 
-							Double TFIDF = TFIDF(occurrenceObject.getDocName(), tempTerm.getWord());
 							for(int k = 0; k < this.totalDocuments; k++) {
 								if(docs[k].equals(occurrenceObject.getDocName())) {
+									Double TFIDF = TFIDF(occurrenceObject.getDocName(), tempTerm.getWord());
+//									if(occurrenceObject.getDocName().equals("simple4b.txt")) {
+//										System.out.println("simple4b.txt - TFIDF*WIQ: "+TFIDF*WIQ);
+//									}
 									//k is the position
-									docSpecific[k] += (TFIDF*TFIDF); // add it to the value in docSpecific in the position for doc d 
+									//docSpecific[k] += (TFIDF*TFIDF); // add it to the value in docSpecific in the position for doc d 
 									 // ii.     If the term is in both query and document d, mutiply wi,d with wi,q  and add it to the value in common in the position for document d
-									common[k] += TFIDF*WIQ;
-									System.out.println("word: "+ tempTerm.getWord());
-									System.out.println("docs[k]: "+docs[k]);
-									System.out.println("docSpecific[k]: "+docSpecific[k]);
-									System.out.println("WIQ: "+WIQ);
-									System.out.println("common: "+common[k]);
-									System.out.println();
-									break;//found position
-									
+									//double formatedTFWIQ = Double.parseDouble(formatter.format((TFIDF*WIQ)));
+									common[m][k] += (TFIDF*WIQ);
 								}
 							}
-						}
-						
+						}//end for loop through occurrence object
 					}
+				}//end while iterator has next loop
+			}//end cleanedWords loop
+			queryCounter++;
+		}//end final for loop
+		for(int k = 0; k < Query.size(); k++) {
+			for(int j = 0; j < docs.length; j++) {
+				//double formatedTFWIQ = Double.parseDouble(formatter.format((TFIDF*WIQ)));
+				totalSim[k][j] = common[k][j] / (Double.parseDouble(formatter.format((Math.sqrt(docSpecific[j]))))*Double.parseDouble(formatter.format((Math.sqrt(queryWeights[k])))));
+				//totalSim[k][j] = (Math.sqrt(queryWeights[k]) / (Math.sqrt(docSpecific[j]))+(Math.sqrt(queryWeights[k]));
+//				System.out.println("common[k][j]: "+common[k][j]);
+//				System.out.println("/");
+//				System.out.println("(Math.sqrt(docSpecific[j])): "+Double.parseDouble(formatter.format((Math.sqrt(docSpecific[j])))));
+//				System.out.println("*");
+//				System.out.println("Math.sqrt(queryWeights[k]): "+Double.parseDouble(formatter.format((Math.sqrt(queryWeights[k])))));
+//				System.out.println("=");
+//				System.out.println("totalSim[k][j]: "+ Double.parseDouble(formatter.format(totalSim[k][j])));
+//				System.out.println();
+			}
+		}
+		
+		double maxValue[] = new double[Query.size()];
+		for(int k = 0; k < Query.size(); k++) {
+			for(int j = 0; j < this.totalDocuments; j++) {
+				if(totalSim[k][j] > maxValue[k]) {
+					maxValue[k] = totalSim[k][j];
 				}
 			}
 		}
-		System.out.println("SPECIFICS (query weight): "+queryWeights);
-		for(int j = 0; j < this.totalDocuments; j++) {
-			totalSim[j] = common[j] / (Math.sqrt(docSpecific[j]))+(Math.sqrt(queryWeights));
-		}
-		double maxValue = 0;
-		for(int k = 0; k < totalSim.length; k++) {
-			if(totalSim[k] > maxValue) {
-				maxValue = totalSim[k];
+		double finalSim[] = new double[Query.size()];
+		String finalDocumentName[] = new String[Query.size()];
+		for(int k = 0; k < Query.size(); k++) {
+			for(int h = 0; h < this.totalDocuments; h++) {
+				if (totalSim[k][h] == maxValue[k]) {
+					finalSim[k] = totalSim[k][h];
+					finalDocumentName[k] = docs[h];
+				}
 			}
 		}
-		for(int h = 0; h < this.totalDocuments; h++) {
-			if (totalSim[h] == maxValue) {
-				sim = totalSim[h];
-				finalDocumentName = docs[h];
+		DecimalFormat finalFormatter = new DecimalFormat("0.00");
+		for(int j = 0; j < finalSim.length; j++) {
+			System.out.print("[");
+			for(String word : cleanedWords[j]) {
+				System.out.print(word+" ");
 			}
+			System.out.print("]");
+			System.out.print(" in "+finalDocumentName[j]+": "+Double.parseDouble(finalFormatter.format(finalSim[j])));
+			System.out.println();
 		}
-		System.out.println(finalDocumentName+": "+sim);
+		
 	}
 	/*
 	 * #####################################################################################################

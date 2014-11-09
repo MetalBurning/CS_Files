@@ -111,7 +111,7 @@ public class PA4 {
 		
 		
 		//testing
-		System.out.println(webPageObject.TFIDF("simple4a.txt", "cat"));
+		//System.out.println(webPageObject.TFIDF("simple4a.txt", "cat"));
 		//endtesting
 		// *******************************************************
 		System.out.println();
