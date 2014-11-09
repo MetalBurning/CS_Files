@@ -117,4 +117,7 @@ public class TermIndexTable implements TermIndex {
         }
         System.out.println();
     } 
+    public Term[] getValues() {
+    	return values;
+    }
 }
