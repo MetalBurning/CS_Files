@@ -29,17 +29,17 @@ BODY        LDR   R0,R5,#2           ; Load parameter
             BRn   NORECURSE          ; Skip recursion
 
             ;; divide by 10
-RECURSE                              ; Push numerator
-                                     ; Load 10
-                                     ; Push 10
-                                     ; Call divide
-                                     ; Load result
-                                     ; Cleanup stack
+RECURSE     PUSH R0                         ; Push numerator
+            LD R1, TEN                         ; Load 10
+            PUSH R1                         ; Push 10
+            JSR Divide                         ; Call divide
+            POP R2                         ; Load result
+            ADD R6, R6, #2                         ; Cleanup stack
 
             ;; recursive call
-                                     ; Push result
-                                     ; Recursive call
-                                     ; Cleanup stack
+            PUSH R2                         ; Push result
+            JSR PRINT                         ; Recursive call
+            ADD R6, R6, #1                         ; Cleanup stack
            
             ;; print digit
 NORECURSE   LDR   R0,R5,#2           ; Reload parameter
@@ -53,9 +53,9 @@ LOOP0       ADD   R0,R0,R1           ; Subtract 10
             LD    R1,TEN             ; Load 10
             ADD   R0,R0,R1           ; Add 10
 
-                                     ; Push digit
-                                     ; Call output
-                                     ; Cleanup stack
+            PUSH R0                         ; Push digit
+            JSR OUTPUT                         ; Call output
+            ADD R6, R6, #1                         ; Cleanup stack
 
             ;; stack exit
 DONE        POP   R5                 ; Pop frame pointer
@@ -64,9 +64,9 @@ DONE        POP   R5                 ; Pop frame pointer
 
 ;; Output a single hexadecimal digit
 OUTPUT      ;; stack entry
-                                     ; Push return address
-                                     ; Push frame pointer
-                                     ; Setup frame pointer
+            PUSH  R7                 ; Push return address
+            PUSH  R5                 ; Push frame pointer
+            ADD   R5,R6,#0           ; Setup frame pointer
 
             ;; function body
             LDR   R1,R5,#2           ; Load parameter
@@ -75,9 +75,9 @@ OUTPUT      ;; stack entry
             TRAP  x21                ; Output digit
 
 CONTINUE    ;; stack exit
-                                     ; Pop frame pointer
-                                     ; Pop return address
-                                     ; Return
+            POP   R5                 ; Pop frame pointer
+            POP   R7                 ; Pop return address
+            RET                      ; Return
 
 ;; Divide function
 DIVIDE      ;; stack entry
