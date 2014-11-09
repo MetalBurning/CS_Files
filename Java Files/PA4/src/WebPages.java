@@ -7,6 +7,7 @@
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Scanner;
 
@@ -131,7 +132,7 @@ public class WebPages {
 	/*
 	 * calculates the TFIDF based on the formula provided
 	 */
-	public String TFIDF(String document, String word) {
+	public Double TFIDF(String document, String word) {
 		//TFIDF(document,word) =  the number of occurrences of term t in document d ("term frequency")
 		//* log (total number of available documents / number of documents containing term t)
 		Term tempTerm = this.FinalTree.get(word, false);
@@ -146,55 +147,69 @@ public class WebPages {
 		}
 		double result = occurrenceTermFrequency * (Math.log((double)totalDocuments / (double)docListSize));
 		DecimalFormat formatter = new DecimalFormat("0.00");
-		return formatter.format(result);
+		return result;
 	}
 	public void bestPages(ArrayList<String> Query) {
 		
-		double sim = 0;
-		String finalDocumentName = "";
+		double common[] = new double[this.totalDocuments];
+		double docSpecific[] = new double[this.totalDocuments];
+		double totalSim[] = new double[this.totalDocuments];
 		String docs[] = new String[this.totalDocuments];
 		int docsCounter = 0;
 		for(String documentName : this.fileNameList) {
 			docs[docsCounter++] = documentName;
 		}
+		double sim = 0;
+		String finalDocumentName = "";
 		double queryWeights = 0;
-		double common[] = new double[this.totalDocuments];
-		double docSpecific[] = new double[this.totalDocuments];
-		double totalSim[] = new double[this.totalDocuments];
+		int queryCounter = 0;
 		
-		for(int j = 0; j < Query.size(); j++) {// for every item that exists in query, we compare it with all the terms 
-			String singleQuery = Query.get(j).toLowerCase();
-			Iterator TermIterator = new Iterator(FinalTree);
-			while (TermIterator.hasNext()) {
-				Term tempTerm = TermIterator.next();
-				if (singleQuery.equals(tempTerm.getWord())) {
-					//compute wi,q add it to queryWeights
-					int dfi = tempTerm.getDocFrequency();
-					int documentsReadIn = this.totalDocuments;
-					//WIQ = .5X(1+ln(n/dfi))
-					double WIQ = 0.5 * (1 + Math.log(documentsReadIn/dfi));
-					queryWeights = WIQ;		//add it to queryWieghts?
-					//b.     For each document d that contains term i:
-					for(Occurrence occurrenceObject: tempTerm.docList) {
-						//  i.     Compute the tfidf value (wi,d), square it and add it to the value in docSpecific in the position for doc d 
-						String TFIDF = TFIDF(occurrenceObject.getDocName(), tempTerm.getWord());
-						double TFIDFvalue = Double.parseDouble(TFIDF);
-						TFIDFvalue = TFIDFvalue*TFIDFvalue;//square it
-						for(int k = 0; k < this.totalDocuments; k++) {
-							if(docs[k].equals(occurrenceObject.getDocName())) {
-								//k is the position
-								docSpecific[k] += TFIDFvalue; // add it to the value in docSpecific in the position for doc d 
-								 // ii.     If the term is in both query and document d, mutiply wi,d with wi,q  and add it to the value in common in the position for document d
-								common[k] += docSpecific[k]*WIQ;
-								break;//found position
-								
+		for(int m = 0; m < Query.size();m++) {// arraylist contains raw line by line Strings
+			String temp = Query.get(m);
+			String[] cleanedWords = temp.split("\\s+");
+			Arrays.sort(cleanedWords);
+			//queryweight
+			
+			
+			for(int j = 0; j < cleanedWords.length; j++) {// for every item that exists in query, we compare it with all the terms 
+				String singleQuery = cleanedWords[j].toLowerCase();
+				Iterator TermIterator = new Iterator(FinalTree);
+				while (TermIterator.hasNext()) {
+					Term tempTerm = TermIterator.next();
+					if (singleQuery.equals(tempTerm.getWord())) {
+						//compute wi,q add it to queryWeights
+						int dfi = tempTerm.getDocFrequency();
+						int documentsReadIn = this.totalDocuments;
+						//WIQ = .5X(1+ln(n/dfi))
+						double WIQ = 0.5 * (1 + Math.log((double)documentsReadIn/dfi));
+						queryWeights += WIQ;
+						//b.     For each document d that contains term i:
+						for(Occurrence occurrenceObject: tempTerm.docList) {
+							//  i.     Compute the tfidf value (wi,d), square it and add it to the value in docSpecific in the position for doc d 
+							Double TFIDF = TFIDF(occurrenceObject.getDocName(), tempTerm.getWord());
+							for(int k = 0; k < this.totalDocuments; k++) {
+								if(docs[k].equals(occurrenceObject.getDocName())) {
+									//k is the position
+									docSpecific[k] += (TFIDF*TFIDF); // add it to the value in docSpecific in the position for doc d 
+									 // ii.     If the term is in both query and document d, mutiply wi,d with wi,q  and add it to the value in common in the position for document d
+									common[k] += TFIDF*WIQ;
+									System.out.println("word: "+ tempTerm.getWord());
+									System.out.println("docs[k]: "+docs[k]);
+									System.out.println("docSpecific[k]: "+docSpecific[k]);
+									System.out.println("WIQ: "+WIQ);
+									System.out.println("common: "+common[k]);
+									System.out.println();
+									break;//found position
+									
+								}
 							}
 						}
+						
 					}
-					
 				}
 			}
 		}
+		System.out.println("SPECIFICS (query weight): "+queryWeights);
 		for(int j = 0; j < this.totalDocuments; j++) {
 			totalSim[j] = common[j] / (Math.sqrt(docSpecific[j]))+(Math.sqrt(queryWeights));
 		}

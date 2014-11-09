@@ -18,7 +18,7 @@ public class PA4 {
 		int numStopWords = 0;
 		int tableSize = 0;
 		ArrayList<String> fileNameList = new ArrayList();
-		ArrayList<ArrayList<String>> bestPagesWordList = new ArrayList<ArrayList<String>>();
+		ArrayList<String> bestPagesWordList = new ArrayList();
 		ArrayList<String> pruneStopWords = new ArrayList();
 		try {
 			
@@ -72,13 +72,13 @@ public class PA4 {
 				} else if (cleanedWords[0].equals("*STOPs*")) {
 					stopTrigger = true;
 				} else if (stopTrigger) {
-					ArrayList tempList = new ArrayList();
 					//hence the loop here to cycle through all the words in cleanedWords
-					Arrays.sort(cleanedWords);
-					for(int h = 0; h < cleanedWords.length;h++) {
-						tempList.add(cleanedWords[h]);
-					}
-					bestPagesWordList.add(tempList);// adds array of strings into an arraylist, each arraylist is one read line on the input file
+					//Arrays.sort(cleanedWords);
+					bestPagesWordList.add(nextString);
+//					for(int h = 0; h < cleanedWords.length;h++) {
+//						tempList.add(cleanedWords[h]);
+//					}
+//					bestPagesWordList.add(tempList);// adds array of strings into an arraylist, each arraylist is one read line on the input file
 				}
 			}
 			
@@ -115,9 +115,8 @@ public class PA4 {
 		//endtesting
 		// *******************************************************
 		System.out.println();
-		for(int j = 0; j < bestPagesWordList.size(); j++) {
-			webPageObject.bestPages(bestPagesWordList.get(j));
-		}
+		webPageObject.bestPages(bestPagesWordList);
+		
 		
 		
 		
