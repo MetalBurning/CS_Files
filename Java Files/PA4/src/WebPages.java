@@ -216,7 +216,7 @@ public class WebPages {
 								}
 							}
 						}//end for loop through occurrence object
-					}
+					}//end if single query word = the terms word
 				}//end while iterator has next loop
 			}//end cleanedWords loop
 			queryCounter++;
@@ -236,7 +236,7 @@ public class WebPages {
 //				System.out.println();
 			}
 		}
-		
+		//calc max value of SIM
 		double maxValue[] = new double[Query.size()];
 		for(int k = 0; k < Query.size(); k++) {
 			for(int j = 0; j < this.totalDocuments; j++) {
@@ -255,6 +255,7 @@ public class WebPages {
 				}
 			}
 		}
+		//Prints final results
 		DecimalFormat finalFormatter = new DecimalFormat("0.00");
 		for(int j = 0; j < finalSim.length; j++) {
 			System.out.print("[");
