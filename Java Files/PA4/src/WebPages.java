@@ -186,7 +186,7 @@ public class WebPages {
 				cleanedWords[m][j] = cleanedWords[m][j].toLowerCase();// make them lowercase
 			}
 			Arrays.sort(cleanedWords[m]); //sort
-			for(int j = 0; j < cleanedWords.length; j++) {// for every item that exists in query, we compare it with all the terms 
+			for(int j = 0; j < cleanedWords[m].length; j++) {// for every item that exists in query, we compare it with all the terms 
 				String singleQuery = cleanedWords[m][j].toLowerCase();
 				//System.out.print(singleQuery+" ");
 				Iterator TermIterator = new Iterator(FinalTree);

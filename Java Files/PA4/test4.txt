@@ -9,3 +9,5 @@ dog
 *STOPs*
 JON dog
 cat coati
+dog cat jon da
+JON dog
