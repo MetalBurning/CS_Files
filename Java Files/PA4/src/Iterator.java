@@ -60,7 +60,6 @@ import java.util.LinkedList;
 			 * Put the correct order of nodes onto the queue
 			 */
 			public void setQueue() {
-				//TODO: calls inorder
 				for(int j = 0;j < allTerms.length; j++) {
 					if (allTerms[j] != null) {
 						inqueue.add(allTerms[j]);

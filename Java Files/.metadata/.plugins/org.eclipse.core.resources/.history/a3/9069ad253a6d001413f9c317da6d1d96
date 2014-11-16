@@ -1,0 +1,71 @@
+import java.util.LinkedList;
+
+/**
+ * Stub file for students to fill in. CSU CS200 Fall 2014 Lab 7.
+ * @author David Newman (Fall 2010), modified AEH (Fall 2014)
+ *
+ * @param <E>
+ * 
+ * @modifiedBy: Jacob Rede
+ */
+		public class Iterator {
+			
+			//TODO: Create your needed instance variables.
+			// a queue tracks the order for visiting the tree nodes
+			LinkedList inqueue = new LinkedList();
+			public Term[] allTerms;
+			/**
+			 * Construct a new iterator object.
+			 * @param binTree
+			 */
+			public Iterator(TermIndexTable HashTable) {
+				int sizeOfTable = HashTable.size();
+				allTerms = ((TermIndexTable) HashTable).getValues().clone();
+				//this.depthSearched = 0;
+				setQueue();
+				
+				//TODO: Initialize your instance variables.
+			}
+			
+
+			/* (non-Javadoc)
+			 * Return true if the iterator has more objects yet to return.
+			 * @see java.util.Iterator#hasNext()
+			 */
+			public boolean hasNext() {
+				//TODO: Fix this up so it does the right thing.
+				if (inqueue.isEmpty()) {
+					return false;
+				}
+				return true;
+			}
+
+			/* (non-Javadoc)
+			 * Return the first object that has not yet been returned.
+			 * @see java.util.Iterator#next()
+			 */
+			public Term next() {
+				//TODO: Fix this up so it does the right thing.
+				if (inqueue.isEmpty()) {
+					return null;
+				}
+				Term tempTerm = new Term("temp");
+				tempTerm = (Term) inqueue.getFirst();
+				inqueue.removeFirst();
+				return tempTerm;
+			}
+
+
+			/*
+			 * Put the correct order of nodes onto the queue
+			 */
+			public void setQueue() {
+				//TODO: calls inorder
+				for(int j = 0;j < allTerms.length; j++) {
+					if (allTerms[j] != null) {
+						inqueue.add(allTerms[j]);
+					}
+				}
+				
+			}
+		}

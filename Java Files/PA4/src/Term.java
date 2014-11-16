@@ -1,8 +1,8 @@
-// PA3 Assignment
-// Author: Alex Eibner and Jacob Rede
-// Date:   9/17/2014
+// PA4 Assignment
+// Author: Jacob Rede and Anna Beckman
+// Date:   11/14/2014
 // Class:  CS200
-// Email:  alexeibner@gmail.com	and jare1987@rams.colostate.edu
+// Email:  anna_beckman@yahoo.com and jare1987@rams.colostate.edu
 
 import java.util.LinkedList;
 

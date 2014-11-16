@@ -1,0 +1,360 @@
+//PA3 Assignment
+//Author: Alex Eibner and Jacob Rede
+//Date:   9/17/2014
+//Class:  CS200
+//Email:  alexeibner@gmail.com	and jare1987@rams.colostate.edu
+
+import java.io.File;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Scanner;
+
+public class WebPages {
+	
+	//public ArrayList<Term> termIndex;
+	private TermIndexTable FinalTree;
+	private int totalDocuments;
+	private ArrayList<String> fileNameList = new ArrayList();
+	public WebPages(int startSize) {
+		//termIndex = new ArrayList<Term>();
+		FinalTree = new TermIndexTable(startSize);
+		totalDocuments = 0;
+	}
+	public void addPage(String filename) {
+		try {
+			Scanner fileScanner = new Scanner(new File(filename));
+			while (fileScanner.hasNextLine()) {
+				
+				 /*
+				 * replaceAll removes all punctuation except '<' and  '>'. This will make it easier to clean the brackets.
+				 */
+				 String tempLine = fileScanner.nextLine().toLowerCase().replaceAll("[\\t\\p{Punct}&&[^>]&&[^<]&&[^']]", " ");
+				
+				 ArrayList<String> bracketStack = new ArrayList<String>();
+				 String cleanedLine = "";
+			 	/*
+				 * This loop implements a stack implementation for brackets.
+				 * If there is a '<' bracket, then we add it onto the stack.
+				 * If there is a '>' bracket, then we remove the last item on the stack.
+				 * Finally we check and make sure the stack is empty.
+				 * If it's empty, we begin adding characters into cleanedWord.
+				 * If not, we move onto the next character in tempword.
+				 */
+				 for(int j = 0; j < tempLine.length(); j++) {
+						//Then adds to the stack.
+						if(tempLine.charAt(j) == '<') {
+							bracketStack.add(tempLine);
+						//Then removes from the stack.
+						} else if (tempLine.charAt(j) == '>') {
+							bracketStack.remove(bracketStack.size()-1);
+						//Concats chars onto the string.	
+						} else if (bracketStack.size() == 0) {
+							cleanedLine = cleanedLine + tempLine.charAt(j);
+						} 
+					}
+				 String[] cleanedWords = cleanedLine.split("\\s+");//splits on space characters and tabs
+				 /*
+				  * This is a foreach loop.
+				  * For each cleanedword, put it into word.
+				  */
+				 for(String word : cleanedWords) {
+					// Add the Term to our arraylist, doesn't yet matter if duplicates.
+					if (!word.isEmpty()) {
+						//##############################Start Binary Search Tree
+						
+						this.FinalTree.add(filename, word);
+						
+						//###############################END Binary Search Tree
+						
+					}//end if
+				 }//end for loop
+			 }//end while loop
+			totalDocuments++;
+			fileNameList.add(filename);
+			Collections.sort(fileNameList);
+			fileScanner.close();
+		} catch (Exception e) {
+			//e.printStackTrace();
+			System.out.println("Error: While reading file line by line: "+ e.getMessage());
+		}
+		
+	}
+	public void printTerms() {
+		System.out.println("WORDS");
+		Iterator hashTableIterator = new Iterator(FinalTree);
+		while (hashTableIterator.hasNext()) {
+			System.out.println(hashTableIterator.next().getWord());
+		}
+		//FinalTree.printHashTableWords();
+	}
+	//###########################################OLD PA2 Code pruneStopWords
+	/*
+	 * First sorts the termIndex by totalFrequency in the term objects.
+	 * Then removes n words from the end of the sort.
+	 * Then resorts based on the word in Term objects(alphabetize).
+	 */
+	public void pruneStopWords(String removeTerm) {
+		if (FinalTree.contains(removeTerm)) {
+			FinalTree.delete(removeTerm);
+		}
+	 }
+	//###########################################END OLD PA2 Code pruneStopWords
+	
+	public String[] whichPages(String word) {
+		/*
+		 * below calls the get method on our BST (FinalTree) which will return the term object where
+		 * the word is located, if the result is null then we return a String Array w/ null in it 
+		 */
+		Term tempTerm = this.FinalTree.get(word, false);
+		if (tempTerm != null) {
+			int numDocuments = tempTerm.getDocFrequency();
+			String[] fileNames = new String[numDocuments];
+			int printCounter = 0;
+			for(int k = 0; k < numDocuments;k++) {
+				if (printCounter == 0) {
+					//prints out the depth
+					fileNames[k] = this.FinalTree.get(word, true).docList.get(k).getDocName();
+					printCounter++;
+				} else {
+					//DOES NOT print out the depth
+					fileNames[k] = this.FinalTree.get(word, false).docList.get(k).getDocName();
+				}
+				
+			}
+			return fileNames;
+		}
+		String[] notFoundStringArray = new String[1];
+		notFoundStringArray[0] = null;
+		return notFoundStringArray;
+	}
+	/*
+	 * calculates the TFIDF based on the formula provided
+	 */
+	public Double TFIDF(String document, String word) {
+		//TFIDF(document,word) =  the number of occurrences of term t in document d ("term frequency")
+		//* log (total number of available documents / number of documents containing term t)
+		Term tempTerm = this.FinalTree.get(word, false);
+		int docListSize = tempTerm.docList.size();
+		int occurrenceTermFrequency = 0;
+		for(int j = 0; j < docListSize; j++) {
+			if (tempTerm.docList.get(j).getDocName().equals(document)) {
+				//if document matches in this part of the TermsDocument Linked List,
+				//then we grab the term frequency in the Occurrence object
+				occurrenceTermFrequency = tempTerm.docList.get(j).getTermFrequency();
+			}
+		}
+		double result = occurrenceTermFrequency * (Math.log((double)totalDocuments / (double)docListSize));
+		//DecimalFormat formatter = new DecimalFormat("0.00");
+		return result;
+	}
+	public void bestPages(ArrayList<String> Query) {
+		
+		double common[] = new double[this.totalDocuments];
+		double docSpecific[] = new double[this.totalDocuments];
+		double totalSim[] = new double[this.totalDocuments];
+		String docs[] = new String[this.totalDocuments];
+		int docsCounter = 0;
+		for(String documentName : this.fileNameList) {
+			docs[docsCounter++] = documentName;
+		}
+		double sim = 0;
+		String finalDocumentName = "";
+		double queryWeights[] = new double[Query.size()];
+		int queryCounter = 0;
+		Iterator TermIteratorBeforeScan = new Iterator(FinalTree);
+		for(int j = 0; j < docs.length; j++) {//for every document, iterat through all terms and do 
+			//b.     For each document d that contains term i:
+			while (TermIteratorBeforeScan.hasNext()) {
+				Term tempTerm = TermIteratorBeforeScan.next();
+				for(Occurrence occurrenceObject: tempTerm.docList) {
+					if(occurrenceObject.getDocName().equals(docs[j])) {//  i.     Compute the tfidf value (wi,d), square it and add it to the value in docSpecific in the position for doc d 
+						Double TFIDF = TFIDF(occurrenceObject.getDocName(), tempTerm.getWord());
+						docSpecific[j] += (TFIDF*TFIDF);
+					}
+				}
+			}
+		}
+		
+		for(int m = 0; m < Query.size();m++) {// arraylist contains raw line by line Strings
+			String temp = Query.get(m);
+			String[] cleanedWords = temp.split("\\s+");
+			Arrays.sort(cleanedWords);
+			//queryweight
+			
+			for(int j = 0; j < cleanedWords.length; j++) {// for every item that exists in query, we compare it with all the terms 
+				String singleQuery = cleanedWords[j].toLowerCase();
+				Iterator TermIterator = new Iterator(FinalTree);
+				while (TermIterator.hasNext()) {
+					Term tempTerm = TermIterator.next();
+					if (singleQuery.equals(tempTerm.getWord())) {
+						//compute wi,q add it to queryWeights
+						int dfi = tempTerm.getDocFrequency();
+						int documentsReadIn = this.totalDocuments;
+						//WIQ = .5X(1+ln(n/dfi))
+						double WIQ = 0.5 * (1 + Math.log((double)documentsReadIn/dfi));
+						queryWeights[queryCounter] += WIQ*WIQ;
+						for(Occurrence occurrenceObject: tempTerm.docList) {
+							//  i.     Compute the tfidf value (wi,d), square it and add it to the value in docSpecific in the position for doc d 
+							Double TFIDF = TFIDF(occurrenceObject.getDocName(), tempTerm.getWord());
+							for(int k = 0; k < this.totalDocuments; k++) {
+								if(docs[k].equals(occurrenceObject.getDocName())) {
+									//k is the position
+									//docSpecific[k] += (TFIDF*TFIDF); // add it to the value in docSpecific in the position for doc d 
+									 // ii.     If the term is in both query and document d, mutiply wi,d with wi,q  and add it to the value in common in the position for document d
+									common[k] += TFIDF*WIQ;
+//									System.out.println("word: "+ tempTerm.getWord());
+//									System.out.println("docs[k]: "+docs[k]);
+//									System.out.println("docSpecific[k]: "+docSpecific[k]);
+//									System.out.println("WIQ: "+WIQ);
+//									System.out.println("common: "+common[k]);
+//									System.out.println();
+									break;//found position
+									
+								}
+							}
+						}//end for loop through occurrence object
+					}
+				}//end while iterator has next loop
+			}//end cleanedWords loop
+			queryCounter++;
+		}//end final for loop
+		for(double weights : queryWeights) {
+			System.out.println("queryWeights[]: "+Math.sqrt(weights));
+		}
+		for(int j = 0; j < docs.length; j++) {
+			System.out.println("filename: "+docs[j]);
+			System.out.println("docSpecific: "+(docSpecific[j]));
+			System.out.println("common: "+common[j]);
+			System.out.println();	
+		}
+		
+		for(int j = 0; j < this.totalDocuments; j++) {
+			totalSim[j] = common[j] / (Math.sqrt(docSpecific[j]))+(Math.sqrt(1));
+		}
+		double maxValue = 0;
+		for(int k = 0; k < totalSim.length; k++) {
+			if(totalSim[k] > maxValue) {
+				maxValue = totalSim[k];
+			}
+		}
+		for(int h = 0; h < this.totalDocuments; h++) {
+			if (totalSim[h] == maxValue) {
+				sim = totalSim[h];
+				finalDocumentName = docs[h];
+			}
+		}
+		System.out.println(finalDocumentName+": "+sim);
+	}
+	/*
+	 * #####################################################################################################
+	 * #####################################PRIVATE BST CLASS###############################################
+	 * #####################################################################################################
+	 * 
+	 * New private sub-class called BST, which makes it only available to the WebPages object
+	 * 
+	 * @param <int> count = counts the words, only incremented in add and insertWord
+	 * @param <TreeNode> root = the very top of our BST, never changes
+	 * @param <InorderIterator> BSTIterator = Queue of Terms in the BST, 
+	 * is only fully created once the last add method has ran
+	 * @param <int> searchDepth = stores the depth when search is called, resets to 1 every time get is called
+	 */
+//	private class BST {
+//		private int count;
+//		private TreeNode root;
+//		public InorderIterator BSTIterator;
+//		private int searchDepth;
+//		
+//		public BST() {
+//			this.count = 0;
+//			this.searchDepth = 0;
+//			this.root = null;
+//			BSTIterator = null;
+//			
+//		}
+//		public int size() {
+//			return this.count;
+//		}
+//		/*
+//		 * adds words into the BST, if the root is null then we have an empty BST, so we create our first TreeNode
+//		 * if the root node isn't null we call the insetWord method (which is recursive) 
+//		 */
+//		public void add(String documentName, String word) {
+//			if (this.root == null) {
+//				Term newTermObject = new Term(word);
+//				newTermObject.incFrequency(documentName);
+//				this.root = new TreeNode(newTermObject);
+//				BSTIterator = new InorderIterator(this.root);
+//				this.count++;//increment the word count since were creating a new Term object
+//			} else {
+//				insertWord(word, this.root, documentName);
+//				BSTIterator = new InorderIterator(this.root);
+//			}
+//			//adds a new term or increments frequencies if the term already exists in the BST
+//		}
+//		/*
+//		 * returns the Term Object of word by searching the BST
+//		 * calls search (which is recursive)
+//		 * prints the serachDepth if printDepth is true or 
+//		 * if its false but the search returned null (meaning it did not find the word in our BST, so it doesn't exist)
+//		 */
+//		public Term get(String word, Boolean printDepth) {
+//			this.searchDepth = 1;
+//			Term tempTerm = search(word.toLowerCase(), this.root);
+//			if (printDepth) {
+//				System.out.println("  At depth "+this.searchDepth);
+//				printDepth = false;
+//			} else if (printDepth == false && tempTerm == null) {
+//				System.out.println("  At depth "+this.searchDepth);
+//			}
+//			return tempTerm;
+//		}
+//		/*
+//		 * recursively search the BST, same format as insertWord below, 
+//		 * without the documentName since we dont need it
+//		 */
+//		public Term search(String word, TreeNode treeNode) {
+//			if (treeNode == null) {
+//				return null;
+//			} else if (word.compareTo(treeNode.getItem().getWord()) == 0) {
+//				return treeNode.getItem();
+//			} else if (word.compareTo(treeNode.getItem().getWord()) < 0) {
+//				this.searchDepth++;
+//				return search(word, treeNode.getLeft());
+//			} else {
+//				this.searchDepth++;
+//				return search(word, treeNode.getRight());
+//			}
+//			
+//		}
+//		/*
+//		 * recursive method that will traverse the binary tree and insert nodes where they belong
+//		 * if TreeNode is null, then we hit our base case so we create a new TreeNode w/ inputWord 
+//		 * inputWord < TreeNode's word then recurse with the leftSubTree
+//		 * inputWord == TreeNode's word then increment the frequency of the word that already exists
+//		 * inputWord > TreeNode's word then recurse onto the rightSubTree
+//		 */
+//		public TreeNode insertWord(String inputWord, TreeNode treeNode, String documentName) {
+//			//System.out.print("asdasd");
+//			if (treeNode == null) {
+//				Term newTermObject = new Term(inputWord);
+//				newTermObject.incFrequency(documentName);
+//				treeNode = new TreeNode(newTermObject);
+//				this.count++;//increment the word count since were creating a new Term object
+//			} else if (inputWord.compareTo(treeNode.getItem().getWord()) < 0) {
+//				treeNode.setLeft(insertWord(inputWord, treeNode.getLeft(), documentName));
+//			} else if (inputWord.compareTo(treeNode.getItem().getWord()) == 0) {
+//				treeNode.getItem().incFrequency(documentName);
+//			} else {
+//				treeNode.setRight(insertWord(inputWord, treeNode.getRight(), documentName));
+//			}
+//			return treeNode;
+//		}
+//	}//end private BST
+	/*
+	 * #####################################################################################################
+	 * #####################################END PRIVATE BST CLASS###########################################
+	 * #####################################################################################################
+	 */
+}
