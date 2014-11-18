@@ -5,41 +5,37 @@
 // Email:  anna_beckman@yahoo.com and jare1987@rams.colostate.edu
 
 public class TermIndexTable implements TermIndex {
-	private Term values[];
-	private String keys[];
-	private int currentSize, maxSize;
-	
+	private hashTableNode nodes[];
+	private int currentSize;
+	private int maxSize;
 	
 	public TermIndexTable(int startSize) {
-		values = new Term[startSize];	//sets the size
-		keys = new String[startSize];
+		nodes = new hashTableNode[startSize];	//sets the size
+		for(int j = 0; j < startSize;j++) {
+			this.nodes[j] = new hashTableNode();
+		}
 		currentSize = 0;
 		maxSize = startSize;
 	}
 	public void insert(Term value, String word) {
-		//resize();
-		int key = Math.abs(hash(word));
-		int tempKeyCopy = key;
-        int quadraticProb = 1;
-        do {
-            if (keys[key] == null) {
-            	keys[key] = word;
-                values[key] = value;
-                currentSize++;
-                return;
-            } else if(keys[key].equals("RESERVED")) {
-            	 keys[key] = word;
-                 values[key] = value;
-                 return;
-            }
-            if (keys[key].equals(word)) { 
-            	//values[key] = value;
-                return; 
-            }            
-            
-            key = (key + quadraticProb * quadraticProb) % maxSize;   
-            quadraticProb++;
-        } while (tempKeyCopy != key); 
+		resize();
+		int index = hash(word);
+		int indexCopy = index;
+        int quadraticProb = 0;
+        while(quadraticProb < maxSize) {
+        	if (this.nodes[index].isDeleted()) {
+        		this.nodes[index] = new hashTableNode(value,word,1);
+        		currentSize++;
+        		return;
+        	} 
+        	if(this.nodes[index].isEmpty()) {
+        		this.nodes[index] = new hashTableNode(value,word,1);
+        		currentSize++;
+        		return;
+        	}
+        	quadraticProb++;
+        	index = (indexCopy + (quadraticProb * quadraticProb)) % maxSize;
+        }
 	}
 	@Override
 	public void add(String filename, String newWord) {
@@ -53,19 +49,9 @@ public class TermIndexTable implements TermIndex {
 			existingTermObject.incFrequency(filename);
 		} else {
 			insert(newTermObject, newWord);
-			//resize();
 		}
 		// TODO Auto-generated method stub
 	}
-	public int getHashIndex(String word) {
-        
-		int hashIndex = hash(word);
-        
-        if (hashIndex < 0) {
-            hashIndex = hashIndex + maxSize;
-        } // end if
-        return hashIndex;
-    } // end getHashIndex
 	
 	private int hash(String word) {
         return Math.abs(word.hashCode() % maxSize);
@@ -79,27 +65,25 @@ public class TermIndexTable implements TermIndex {
     }
 	@Override
 	public void delete(String word) {
-		//System.out.println("word to delete: "+word);
-		if (!contains(word)) 
+		if (!contains(word)) {
             return;
- 
-        int key = hash(word);
-        int quadraticProb = 1;
+		}
+        int index = hash(word);
+        int indexCopy = index;
+        int quadraticProb = 0;
         
-        while (!word.equals(keys[key])) 
-        	key = (key + quadraticProb * quadraticProb++) % maxSize;
-        // Clear the keys and values
-        keys[key] = "RESERVED";
-        values[key] = null;
-        //currentSize--;  
-        // rehash all keys         
-        //rehash();
-        
+        while(quadraticProb < maxSize) {
+	        if(word.equals(this.nodes[index].getWord())) {//if words match
+	        	this.nodes[index].deleteNode();
+	        	currentSize--;
+	        }
+	        quadraticProb++;
+    		index = (indexCopy + (quadraticProb * quadraticProb)) % maxSize;
+    	}
 		
 	}
 	private void resize() {
-		//System.out.println(((double) currentSize / (double) maxSize));
-		if (((double) currentSize / (double) maxSize) >= 0.8) {
+		if ( currentSize  >= maxSize * 0.80) {
 			rehash();
 		}
 	}
@@ -108,46 +92,94 @@ public class TermIndexTable implements TermIndex {
      * Expand the hash table.
      */
 	 private void rehash() {
-		 Term[] oldValues = values;
-		 String[] oldKeys = keys;
-		 int oldSize = oldValues.length;
-		 int newSize = (2 * this.currentSize) + 1;
-		 this.values = new Term[newSize];
-		 this.keys = new String[newSize];
+		 hashTableNode oldNodes[] = new hashTableNode[maxSize];
+		 System.arraycopy(this.nodes, 0, oldNodes, 0, oldNodes.length);
+		 int oldSize = maxSize;
+		 int newSize = (2 * this.maxSize) + 1;
+		 this.nodes = new hashTableNode[newSize];
 		 this.currentSize = 0;
 		 this.maxSize = newSize;
-		 
-		 for (int index = 0; index < oldSize; index++) {
-			 if (oldKeys[index] != null && !oldKeys[index].equals("RESERVED")) {
-				 insert(oldValues[index], oldKeys[index]);
-			 } 
+ 
+		 for(int j = 0; j < maxSize;j++) {
+			 this.nodes[j] = new hashTableNode();
 		 }
-	    } // end rehash
-	
+		 for (int index = 0; index < oldSize; index++) {
+			 if(oldNodes[index].inTable()) {
+				 insert(oldNodes[index].getTerm(), oldNodes[index].getWord());
+			 }
+		 }
+	} // end rehash
 	@Override
 	public Term get(String word, Boolean printP) {
-		int hashedWord = hash(word);
-		int quadraticProb = 1;
-        while (keys[hashedWord] != null) {
-            if (keys[hashedWord].equals(word)) {
-            	if(printP) {
-            		values[hashedWord].printTest();//????maybe this im not sure
-            	}
-                return values[hashedWord];
-            }
-            hashedWord = (hashedWord + quadraticProb * quadraticProb++) % maxSize;// Increments quadraticProb after the math
-        }            
-        return null;
+		int index = hash(word);
+		int indexCopy = index;
+		int quadraticProb = 0;
+	    while(quadraticProb < maxSize && (this.nodes[index].inTable() || this.nodes[index].isDeleted())) {
+	        if(word.equals(this.nodes[index].getWord())) {
+	        	return this.nodes[index].getTerm();
+	        }
+	    	quadraticProb++;
+	    	index = (indexCopy + (quadraticProb * quadraticProb)) % maxSize;
+	    }
+	    return null;
 	}
-    public void printHashTableWords() {
-        for (int i = 0; i < maxSize; i++) {
-        	if (keys[i] != null && !keys[i].equalsIgnoreCase("RESERVED")) {
-                System.out.println(keys[i]);
-        	}
-        }
-        System.out.println();
-    } 
     public Term[] getValues() {
-    	return values;
+    	Term[] allTerms = new Term[maxSize];
+    	int counter = 0;
+    	for(int j = 0; j < maxSize;j++) {
+    		if(this.nodes[j].inTable()) {
+    			allTerms[counter] = this.nodes[j].getTerm();
+    			counter++;
+    		}
+    	}
+    	return allTerms;
     }
+    private class hashTableNode {    
+    	private Term termObject;
+    	private String word;
+    	private int status; //0 = empty, 1 = inTable, 2 = deleted from table
+    	public hashTableNode() {
+    		this.termObject = null;
+    		this.word = null;
+    		this.status = 0;
+    	}
+    	public hashTableNode(Term newTermObject, String newWord, int currentStatus) {
+    		this.termObject = newTermObject;
+    		this.word = newWord;
+    		this.status = currentStatus;
+    	}
+    	public boolean inTable() {
+    		return status==1;
+    	}
+    	public boolean isDeleted() {
+    		return status==2;
+    	}
+    	public boolean isEmpty() {
+    		return status==0;
+    	}
+    	public void deleteNode() {
+    		this.termObject = null;
+    		this.word = null;
+    		this.status = 2;
+    	}
+    	public Term getTerm() {
+    		return termObject;
+    	}
+    	public String getWord() {
+    		return this.word;
+    	}
+    	public void print() {
+    		if(this.termObject != null && this.word != null) {
+    			System.out.println("Term word: "+ termObject.getWord());
+        		System.out.println("String word: "+ word);
+        		System.out.println("int status(0=empty, 1=intable, 2=deleted): "+ status);
+    		} else {
+    			System.out.println("Term word: null");
+        		System.out.println("String word: null");
+        		System.out.println("int status(0=empty, 1=intable, 2=deleted): "+ status);
+    		}
+    		
+    	}
+    }
+    
 }

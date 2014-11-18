@@ -1,6 +1,7 @@
 #
 #	Author: Jacob Rede 830172687
-#	Class: CT320
+#	Class: 	CT320
+#	Date: 	11/17/14
 #
 import socket
 import sys, getopt
@@ -63,7 +64,7 @@ def scan_server(address, port):
 			result = sock.connect_ex((address, port))
 			if result == 0:
 				counter+=1
-				#print "Connected to server {%s} on port {%s}." % (socket.gethostbyaddr(address)[0], port)
+				print "Connected to server {%s} on port {%s}." % (socket.gethostbyaddr(address)[0], port)
 			sock.close()
 	if counter > 0:
 		return True
